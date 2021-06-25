@@ -69,8 +69,27 @@ const runStart = () => {
 };
 
 const runEmployees = () => {
-  console.log('runEmployees()');
-  runStart();
+  const allEmployees = `SELECT 
+	  employee.id AS "Employee ID", 
+    employee.first_name AS "First Name", 
+    employee.last_name AS "Last Name", 
+    role.title AS "Title", 
+    department.name AS "Department", 
+    role.salary AS "Starting Salary", 
+    CONCAT(manager.first_name, " ", manager.last_name) AS "Employee's Manager"
+		FROM employee
+		LEFT JOIN role
+			ON role.id = employee.role_id
+		LEFT JOIN department
+			ON department.id = role.department_id
+		LEFT JOIN employee AS manager
+			ON manager.id = employee.manager_id`;
+
+  connection.query(allEmployees, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    runStart();
+  })
 };
 
 const runByDepartment = () => {
