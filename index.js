@@ -1,12 +1,14 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+require('dotenv').config();
 
+// Create connection
 const connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
-  user: 'root',
-  password: '',
-  database: 'tracker_db'
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 connection.connect((err) => {
@@ -28,7 +30,8 @@ const runStart = () => {
         'Add Employee',
         'Remove Employee',
         'Update Employee Role',
-        'Update Employee Manager'
+        'Update Employee Manager',
+        'EXIT'
       ],
     })
     .then((answers) => {
@@ -54,6 +57,9 @@ const runStart = () => {
         case 'Update Employee Manager':
           runUpdateManager();
           break;
+        case 'EXIT':
+          connection.end();
+          
           
         default:
           console.log(`Invalid action: ${answers.employees}`);
