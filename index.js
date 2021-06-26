@@ -17,8 +17,7 @@ connection.connect((err) => {
 });
 
 const runStart = () => {
-  inquirer
-    .prompt({
+  inquirer.prompt({
       name: 'employees',
       type: 'list',
       message: 'What would you like to do?',
@@ -29,7 +28,7 @@ const runStart = () => {
         'View All Employees By Department',
         'View All Employees by Manager',
         'Add a new Department',
-        'And a new Employee Role',
+        'Add a new Employee Role',
         'Add a new Employee',
         'Remove Employee',
         'Update Employee Role',
@@ -57,7 +56,7 @@ const runStart = () => {
         case 'Add a new Department':
           runAddDepartment();
           break;
-        case 'Add an new Employee Role':
+        case 'Add a new Employee Role':
           runAddRole();
           break;
         case 'Add a new Employee':
@@ -147,11 +146,62 @@ const runByManager = () => {
 };
 
 const runAddDepartment = () => {
-  runStart();
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'dept',
+      message: 'Enter name of the department you want to add:'
+    },
+  ]).then((answer) => {
+    connection.query(`INSERT INTO department (name) VALUES ('${answer.dept}');`,
+      (err, res) => {
+        if (err) throw err;
+        runStart();
+      }
+    );  
+  });
 };
 
 const runAddRole = () => {
-  runStart();
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'title',
+      message: 'Enter the name of the employee role you would like to add:'
+    },
+    {
+      type: 'input',
+      name: 'salary',
+      message: 'Enter starting salary of this role:'
+    },
+    {
+      type: 'list', 
+      name: 'dept',
+      message: 'Select the department this role reports to:',
+      choices: () => {
+        let deptArray = [];
+        return new Promise((resolve, reject) => {
+          connection.query(`SELECT name, id FROM department`,
+          (err, res) => {
+            if (err) throw err;
+            res.forEach((department) => {
+              deptArray.push({name: department.name, value: department.id});
+            });
+            resolve(deptArray);
+          });
+        });
+      }
+    }
+
+  ]).then((answer) => {
+    connection.query(`INSERT INTO role (title, salary, department_id) 
+      VALUES ('${answer.title}', '${answer.salary}', ${answer.dept});`,
+      (err, res) => {
+        if (err) throw err;
+        runStart();
+      }
+    );
+  });
 };
 
 const runAddEmployee = () => {
